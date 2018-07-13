@@ -1,17 +1,56 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, AsyncStorage, Button, TouchableOpacity } from 'react-native';
+import { StackNavigator } from 'react-navigation';
+import { MapView } from 'expo';
+import Swiper from 'react-native-swiper'
 
-export default class App extends React.Component {
+//Screens
+import LoginScreen  from './components/loginScreen'
+
+class App extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
+        <LoginScreen />
       </View>
     );
   }
 }
+
+// //Swiper
+// class SwiperScreen extends React.Component {
+//   static navigationOptions = {
+//     title: 'HoHoHo!'
+//   };
+//
+//   render() {
+//     return (
+//       <Swiper>
+//         <HomeScreen />
+//         <CreateGameScreen />
+//       </Swiper>
+//     );
+//   }
+// }
+
+//Navigator
+export default StackNavigator({
+  Login: {
+    screen: LoginScreen,
+  },
+  Register: {
+    screen: RegisterScreen,
+  },
+  Users: {
+    screen: UsersScreen,
+  },
+  Messages: {
+    screen: MessagesScreen,
+  },
+  Swiper: {
+    screen: SwiperScreen,
+  }
+}, {initialRouteName: 'Login'});
 
 const styles = StyleSheet.create({
   container: {

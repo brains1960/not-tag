@@ -1,17 +1,47 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ListView,
+  Alert,
+  Button,
+  AsyncStorage,
+  RefreshControl,
+} from 'react-native';
+import { StackNavigator } from 'react-navigation';
+import { Location, Permissions, MapView } from 'expo';
+import Swiper from 'react-native-swiper'
 
-export default class App extends React.Component {
+//Screens
+import LoginScreen from './components/loginScreen'
+import CreateGameScreen from './components/createGame'
+
+class App extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
+        <LoginScreen styles={styles} naivgator={this.props.navigation.navigate}/>
       </View>
     );
   }
 }
+
+//Navigator
+export default createStackNavigator({
+  Home:{
+    screen: App,
+  },
+  Login: {
+    screen: LoginScreen,
+  },
+  CreateGame: {
+    screen: CreateGameScreen,
+  },
+}, {initialRouteName: 'Home'});
+
 
 const styles = StyleSheet.create({
   container: {
@@ -20,4 +50,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  textInput: {
+    width: 250,
+    padding: 5,
+
+  },
+
 });

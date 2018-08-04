@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View, AsyncStorage, Button, TouchableOpacity, TextInput, ListView, RefreshControl } from 'react-native';
-import { MapView } from 'expo';
+import { StyleSheet, Text, View, AsyncStorage, Button, TouchableOpacity, TextInput, ListView, RefreshControl,
+Image } from 'react-native';
+import { Location, MapView } from 'expo';
 import StackNavigator from '../App.js'
 import hostIP from '../backend'
 import BackgroundTimer from 'react-native-background-timer';
@@ -25,6 +26,7 @@ class MainGameScreen extends React.Component {
   }
 
   componentDidMount() {
+    this.location = setInterval(() => this.updateLocation(), 30000);
     AsyncStorage.getItem('login')
     .then(parsedLogin => {
       //Get the information for the logged in player
@@ -33,18 +35,13 @@ class MainGameScreen extends React.Component {
       .then(resp => resp.json())
       .then(fetched => {
         this.setState({currUser: fetched})
-        AsyncStorage.mergeItem('login', JSON.stringify({
-          "zombie" : fetched.zombie,
-          "latitude" : fetched.latitude,
-          "longitude" : fetched.longitude
-        }))
       })
       AsyncStorage.getItem('room')
       .then(result => {
         let game = JSON.parse(result);
         game.time = game.time*3600
         if (!game.state) {
-          this.props.navigation.navigate('GameRoom')
+          this.props.navigation.navigate('GameRoom');
         }
         //If in a room
         if (Object.keys(game).length > 0) {
@@ -74,8 +71,11 @@ class MainGameScreen extends React.Component {
     })
   }
 
+  componentWillUnMount() {
+    clearInterval(this.location);
+  }
+
   sortPlayers(players){
-    console.log('sortPlayers');
     let zPlayers = []
     players.map((item) =>  {
       fetch(hostIP+'/player/'+item.id)
@@ -92,34 +92,31 @@ class MainGameScreen extends React.Component {
         }
       })
       .catch(err => {
-        console.log('mainGame.js:96 -', err)
+        console.log('mainGame.js:95 -', err)
       })
     });
   }
 
   distanceCalc(lat1, lon1, lat2, lon2){
-    console.log(lat1, lon1);
-    console.log(lat2, lon2);
-    let dlon = lon2 - lon1
-    let dlat = lat2 - lat1
+    let dlon = (lon2 - lon1) * (Math.PI / 180)
+    let dlat = (lat2 - lat1) * (Math.PI / 180)
+    lat1 = lat1 * (Math.PI / 180)
+    lat2 = lat2 * (Math.PI / 180)
     let a = (Math.sin(dlat/2))^2 + Math.cos(lat1) * Math.cos(lat2) * (Math.sin(dlon/2))^2
     let c = 2 * Math.atan(Math.sqrt(a), Math.sqrt(1-a) )
     let R = 6373000
     let d = R * c
-    console.log('Distance', d);
-    return d
+    console.log('Distant', d/1000)
+    return d/1000
   }
 
   nearbyPlayers(players) {
     let currUser = this.state.currUser;
-    console.log('players', players);
     let nearby = players.filter(player => {
-      return this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 100
+      return this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 100000
     });
-    console.log('nearby', nearby);
     this.setState({nearby});
   }
-
 
 
   getPlayerDetails(id){
@@ -139,6 +136,22 @@ class MainGameScreen extends React.Component {
     .then(this.props.navigation.navigate('Hunt'));
   }
 
+  updateLocation = async () => {
+    console.log('Update positions');
+    let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
+    fetch(hostIP+'/player/location/'+this.state.currUser.id, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      })
+    })
+    .catch(err => console.log('MainGame 147 - ', err));
+  }
+
   _onRefresh = () => {
     this.setState({refreshing: true});
     this.sortPlayers(this.state.players)
@@ -156,9 +169,18 @@ class MainGameScreen extends React.Component {
                   <Text style={styles.h3}>You're a Zombie</Text>
                   <Text style={styles.h4}>Nearby Snacks:</Text>
                   <ListView
+                    style={{ display: 'flex' }}
                     enableEmptySections={true}
                     renderRow={(item) => {
-                      return (<TouchableOpacity style={{marginTop: 30, textAlign: 'center'}} onPress={() => this.bite(item)}><Text>{item.name}</Text></TouchableOpacity>)
+                      return (
+                        <TouchableOpacity style={{marginTop: 30, padding: 30, flex: 1 }} onPress={() => this.bite(item)}>
+                          <Image
+                            style={{ width: 70, height: 70, borderRadius: 10 }}
+                            source={{uri: 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_640.png' }}
+                          />
+                          <Text style={{fontSize: 24}}>{item.name}</Text>
+                        </TouchableOpacity>
+                      )
                     }}
                     dataSource={dataSource}
                     refreshControl={

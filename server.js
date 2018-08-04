@@ -160,6 +160,17 @@ app.get('/player/status/:id', function (req,res){
   })
 })
 
+// Update Locations
+app.post('/player/location/:id', function(req, res){
+  Player.findByIdAndUpdate(req.params.id, {longitude : req.body.longitude,
+                                            latitude: req.body.latitude })
+  .exec(function(err, resp){
+    if(err) res.status(500).end(err.message)
+    //would like this to send back all players <---- can remove comment when done
+    else res.json(resp)
+  })
+})
+
 //send invite
 app.post('/invite', function(req, res){
   const accountSid = 'AC2857c7236f874ddb5875fa9fa4b6a50e';

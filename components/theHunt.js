@@ -34,7 +34,7 @@ class Hunt extends React.Component {
     .then(result => {
       if(result){
         var parsedResult = JSON.parse(result);
-        console.log('login' ,parsedResult)
+        console.log('login', parsedResult)
         this.setState({player: parsedResult});
         AsyncStorage.getItem('bitten')
         .then(resp => {
@@ -56,22 +56,20 @@ zombified = (id) => {
   })
   .then(resp => resp.json())
   .then(parsedResp => {
-    if(parsedResp) {
+    if(parsedResp && parsedResp.name === this.state.name) {
       AsyncStorage.mergeItem('login', JSON.stringify({
-        "username": parsedResp.name,
         "zombie" : true,
-        "latitude" : parsedResp.latitude,
-        "longitude" : parsedResp.longitude,
       }))
       .then(() => {
         console.log('bite')
         this.props.navigation.navigate('notSurvived')
       })
-      .catch(err => console.log(err))
-    }})
-    .catch(err => {
-
-    });
+    } else {
+      console.log('bite')
+      this.props.navigation.navigate('notSurvived')
+    }
+  })
+  .catch(err => console.log(err))
   }
 
   render() {

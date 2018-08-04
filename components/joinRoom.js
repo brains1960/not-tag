@@ -103,7 +103,7 @@ class JoinGameScreen extends React.Component {
     // const styles = this.props.styles
 
     return (
-      <View style={styles.container}>
+      <View style={styles.container} enableEmptySections={true}>
         <Text style={{fontSize: 20}}>Enter the Name and Password of the game you want to join</Text>
         <TextInput style={styles.textInput} placeholder='Game Name' onChangeText={(text) => this.setState({gameName: text})} />
         <TextInput style={styles.textInput} placeholder='Game Password' onChangeText={(text) => this.setState({gamePass: text})} secureTextEntry={true}/>

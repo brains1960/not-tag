@@ -38,14 +38,24 @@ app.use(bodyParser.json())
 // routes
 // Create a new player
 app.post('/player/create', function (req, res) {
-  new Player(req.body)
-    .save()
-    .then((doc) => {
-      res.json({id: doc._id, name: doc.name, latitude: doc.latitude,
-    longitude: doc.longitude, zombie: false})
-    // res.json(doc)
+  Player.findOne({ name: req.body.name }, (err, player) => {
+    if (err) {
+      res.send(err)
+    } else if (player) {
+      res.json({id: player._id, name: player.name, latitude: player.latitude,
+      longitude: player.longitude, zombie: player.zombie });
+    } else {
+      new Player(req.body)
+        .save()
+        .then((doc) => {
+          res.json({id: doc._id, name: doc.name, latitude: doc.latitude,
+        longitude: doc.longitude, zombie: false})
+        // res.json(doc)
+      })
+      .catch((err) => res.status(500).end(err.message))
+    }
   })
-    .catch((err) => res.status(500).end(err.message))
+  .catch((err) => res.status(500).end(err.message))
 });
 
 // display current players
@@ -95,11 +105,10 @@ app.post('/game/enter', function (req, res) {
       id: req.body.currUser.id,
       latitude: req.body.currUser.latitude,
       longitude: req.body.currUser.longitude,
-    })
+    });
 
-    console.log('Players', room.players)
     let inRoom = room.players.filter((item) => item.id === req.body.currUser.id)
-    console.log('check', inRoom)
+
     if(inRoom.length === 0){
       Game.findOneAndUpdate({password: req.body.password, gameName: req.body.gameName}, {players:players}, {new : true})
       .then(doc => {

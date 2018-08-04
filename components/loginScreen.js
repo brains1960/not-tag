@@ -18,10 +18,14 @@ class LoginScreen extends React.Component {
     // AsyncStorage.removeItem('room')
     AsyncStorage.getItem('login')
     .then(user => {
-      console.log('Login User', user)
+      // console.log('Login User', user)
       if (user && Object.keys(JSON.parse(user)).length >  0) {
         this.props.navigation.navigate('CreateGame');
       }
+    })
+    .catch(err => {
+      console.log('loginScreen.js: 27 -', err);
+      this.setState({loginError: err.message});
     });
   }
 
@@ -58,12 +62,12 @@ class LoginScreen extends React.Component {
           }))
           .then(this.props.navigation.navigate('CreateGame'))
           .catch(err => {
-            console.log('loginScreen.js: 60 -', err);
+            console.log('loginScreen.js: 65 -', err);
             this.setState({loginError: err.message});
           });
         }})
         .catch(err => {
-          console.log('loginScreen.js: 65 -', err);
+          console.log('loginScreen.js: 70 -', err);
           this.setState({loginError: err.message});
         });
       } else {
@@ -73,7 +77,7 @@ class LoginScreen extends React.Component {
 
   render(){
     return (
-      <View style={styles.container}>
+      <View style={styles.container} enableEmptySections={true}>
         <TextInput style={styles.textInput} placeholder='Pick a Screen Name' onChangeText={(text) => this.setState({username: text})}></TextInput>
         <Button title="Login" onPress={() => this.login()} style={styles.button}> </Button>
         <Text style={styles.error}>{this.state.loginError}</Text>

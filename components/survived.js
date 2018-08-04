@@ -45,39 +45,43 @@ class Survived extends React.Component {
 
   render() {
     const resultHunt = () => { if(this.state.player.zombie){
-      return  <View style={{
+      return  <View
+        style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-      }}>
-      <View>
+      }}
+      enableEmptySections={true}>
+      <View enableEmptySections={true}>
         <Image
           source={{uri: 'https://i.imgur.com/JfIvNX1.gif?1'}}
           style={{ height: 140, width: 200, alignItems: 'center',
           justifyContent: 'center'}}
         />
       </View>
-      <View><Text style={{fontSize: 65, textAlign:'center'}}>Alas, you go hungry</Text></View>
+      <View enableEmptySections={true}><Text style={{fontSize: 65, textAlign:'center'}}>Alas, you go hungry</Text></View>
 
     </View>
   } else {
     return (
-      <View style={{
+      <View
+        style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-      }}>
+      }}
+      enableEmptySections={true}>
       <Image
         source={{uri: 'https://i.imgur.com/JfIvNX1.gif?1'}}
         style={{ height: 140, width: 200, alignItems: 'center',
         justifyContent: 'center'}}
       />
-      <View><Text style={{fontSize: 50, textAlign:'center'}}>You survive another day!</Text></View>
+      <View enableEmptySections={true}><Text style={{fontSize: 50, textAlign:'center'}}>You survive another day!</Text></View>
     </View>
   )}
 }
 return (
-  <View>
+  <View enableEmptySections={true}>
     {resultHunt()}
     <Button color="#e03e3e" style={{
       marginLeft: 5,

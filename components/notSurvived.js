@@ -43,17 +43,19 @@ class notSurvived extends React.Component {
 
   render() {
     return (
-      <View style={{
+      <View
+        style={{
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-        }}>
+        }}
+        enableEmptySections={true}>
         <Image
           source={{uri: 'https://vignette.wikia.nocookie.net/animal-jam-clans-1/images/2/2e/Skull_pixel_art_gif_by_enter1220-d9izg5e.gif/revision/latest?cb=20170915235304'}}
           style={{ height: 140, width: 200, alignItems: 'center',
                     justifyContent: 'center'}}
         />
-        <View><Text style={{fontSize: 50, textAlign:'center'}}>The herd grows....</Text></View>
+        <View enableEmptySections={true}><Text style={{fontSize: 50, textAlign:'center'}}>The herd grows....</Text></View>
         <Button color="#e03e3e" style={{
           marginLeft: 5,
           marginRight: 5,

@@ -77,14 +77,16 @@ zombified = (id) => {
   render() {
     const whatToDo = () => {
       if(this.state.player.zombie){
-        return <View style={{
+        return <View
+          style={{
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor:"#e0b83e"
-        }}>
+        }}
+        enableEmptySections={true}>
         <Text style={{fontSize: 65, textAlign:'center'}} >Dinner Time?</Text>
-        <View>
+        <View enableEmptySections={true}>
           <CountDown
             until={10}
             onFinish={() => this.zombified(this.state.bitten.player._id)}
@@ -96,13 +98,16 @@ zombified = (id) => {
         </View>
       </View>
     } else {
-      return      (<View style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor:"#e0b83e"
-      }}>
-      <View>
+      return      (
+        <View
+          style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor:"#e0b83e"
+        }}
+        enableEmptySections={true}>
+      <View enableEmptySections={true}>
         <Text></Text>
       </View>
       <View style={{
@@ -110,15 +115,16 @@ zombified = (id) => {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor:"#e0b83e"
-      }}>
-      <View><Text style={{fontSize: 65, textAlign:'center'}}>You're bit!</Text></View>
-      <View><Text style={{fontSize: 18, textAlign:'center'}}>Tap in time for the antidote! </Text></View>
-      <View><Text style={{fontSize: 18, textAlign:'center'}}>  </Text></View>
+      }}
+      enableEmptySections={true}>
+      <View enableEmptySections={true}><Text style={{fontSize: 65}}>You're bit!</Text></View>
+      <View enableEmptySections={true}><Text style={{fontSize: 18}}>Tap in time for the antidote! </Text></View>
+      <View enableEmptySections={true}><Text style={{fontSize: 18}}>  </Text></View>
       <Image
         source={{ uri: 'https://i0.wp.com/niddamour.lu/wp-content/uploads/2017/11/scroll-down-Niddamour.lu_.gif?ssl=1' }}
         style={{ height: 175, width: 110 }}
       />
-      <View><Text style={{fontSize: 18, textAlign:'center'}}>  </Text></View>
+      <View enableEmptySections={true}><Text style={{fontSize: 18, textAlign:'center'}}>  </Text></View>
 
       {/* <Button color="#e03e3e" style={{
         marginLeft: 5,
@@ -127,7 +133,7 @@ zombified = (id) => {
         color: "#e03e3e"
       }} title = "Save Yourself!" onPress={() => this.saved}/> */}
     </View>
-    <View>
+    <View enableEmptySections={true}>
       <CountDown
         until={10}
         onPress={() => this.props.navigation.navigate('Survived')}
@@ -143,12 +149,14 @@ zombified = (id) => {
 }
 }
 return (
-  <View style={{
+  <View
+    style={{
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor:"#e0b83e"
-  }}>
+  }}
+  enableEmptySections={true}>
     {whatToDo()}
 </View>
 )

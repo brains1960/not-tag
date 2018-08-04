@@ -47,7 +47,7 @@ class GameRoomScreen extends React.Component {
       .then(room => {
         let game = JSON.parse(room)
         //If there is a game the user belongs to
-        console.log('game', game)
+        // console.log('game', game)
         if(game && game.state === false) {
           fetch(hostIP+'/game/'+game.id)
           .then(resp => resp.json())
@@ -89,24 +89,28 @@ class GameRoomScreen extends React.Component {
 
   invite() {
     //Send data from form
-    Communications.text(this.state.invited,
-      'Hey You have been invited to play a Game of Humans vs zombies by '+this.state.invitationName+
-      '.\nJoin the game with the below details: \nGame Name: '+
-      this.state.name+'\n Password :'+this.state.password)
-    SendSMS.send({
-  		body: 'Hey '+this.state.invitationName,
-  		recipients: [this.state.invited],
-  		successTypes: ['sent', 'queued', 'failed']
-  	}, (completed, cancelled, error) => {
+    // Communications.text(this.state.invited,
+      // 'Hey You have been invited to play a Game of Humans vs zombies by '+this.state.invitationName+
+      // '.\nJoin the game with the below details: \nGame Name: '+
+      // this.state.name+'\n Password :'+this.state.password
 
-  		console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
-
-  	})
-    .catch(err => console.log('SMS erro', err));
+    //React Native SMS
+    // SendSMS.send({
+  	// 	body: 'Hey You have been invited to play a Game of Humans vs zombies by '+this.state.invitationName+
+    //   '.\nJoin the game with the below details: \nGame Name: '+
+    //   this.state.name+'\n Password :'+this.state.password,
+  	// 	recipients: [this.state.invited],
+  	// 	successTypes: ['sent', 'queued', 'failed']
+  	// }, (completed, cancelled, error) => {
+    //
+  	// 	console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
+    //
+  	// })
+    // .catch(err => console.log('SMS erro', err));
 
     //React Native SMs
     // SendSMS.send({}, (completed, cancelled, error) => {
-
+    //
   	// 	console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
     //
   	// })
@@ -117,20 +121,20 @@ class GameRoomScreen extends React.Component {
     let pass = this.state.password
 
     //Twilio
-    // fetch(hostIP+'/invite', {
-    //   method: 'POST',
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   },
-    //   body: JSON.stringify({
-        // body: 'Hey You have been invited to play a Game of Humans vs zombies by '+iname+
-        // '.\nJoin the game with the details below: \nGame Name: '+
-        // gname+'\n Password :'+pass,
-    //     to: this.state.invited,
-    //   })
-    // })
-    // .then(resp => resp.json())
-    // .catch(err => console.log(err))
+    fetch(hostIP+'/invite', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        body: 'Hey You have been invited to play a Game of Humans vs zombies by '+iname+
+        '.\nJoin the game with the details below: \nGame Name: '+
+        gname+'\n Password :'+pass,
+        to: this.state.invited,
+      })
+    })
+    .then(resp => resp.json())
+    .catch(err => console.log(err))
 
     //SMS android
     // SmsAndroid.sms(
@@ -197,7 +201,7 @@ class GameRoomScreen extends React.Component {
           }))
         })
         .catch(err => console.log('Game Start', err))
-        if (zombie.id === this.state.currUser.id) {
+        if (zombie.id === this.state.currUser._id) {
           //Set user to zombie
           AsyncStorage.mergeItem('login',JSON.stringify({
             "zombie" : player.zombie,
@@ -223,22 +227,24 @@ class GameRoomScreen extends React.Component {
     let dataSource = ds.cloneWithRows(this.state.players)
 
     return (
-      <View style={styles.container}>
+      <View style={styles.container} enableEmptySections={true}>
         <Text style={styles.h2}>GameRoom: {this.state.name}</Text>
         <Text style={{fontSize: 35}}>Players in the room: {this.state.players.length}</Text>
         <ListView
+          enableEmptySections={true}
           style={{flex: 1, height: 700}}
           renderRow={(player) => {
-              return (<View>
+              return (<View enableEmptySections={true}>
                         {/* Display you for the player  */}
                         <Text style={{fontSize: 25, flex: 1}}>{(player.id === this.state.currUser.id) ? 'You' : player.name}</Text>
                         <MapView
+                          enableEmptySections={true}
                           style={{flex: 2, height: 200, width: 400}}
                           region={{
                             latitude: Number(player.latitude),
                             longitude: Number(player.longitude),
-                            latitudeDelta: 0.05,
-                            longitudeDelta: 0.05
+                            latitudeDelta: 0.04,
+                            longitudeDelta: 0.04
                           }}
                           >
                           <MapView.Marker
@@ -270,8 +276,8 @@ class GameRoomScreen extends React.Component {
           transparent={false}
           visible={this.state.inviteVisible}
           onRequestClose={() => this.setState({inviteVisible: false})}>
-          <View style={{marginTop: 22}}>
-            <View>
+          <View style={{marginTop: 22}} enableEmptySections={true}>
+            <View enableEmptySections={true}>
               <TextInput style={styles.textInput} placeholder='Enter your name' onChangeText={(text) => this.setState({invitationName: text})}></TextInput>
               <TextInput style={styles.textInput} placeholder='Enter Phone number to invite' onChangeText={(text) => this.setState({invited: text})}></TextInput>
 

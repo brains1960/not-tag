@@ -31,7 +31,7 @@ class CreateGameScreen extends React.Component {
       AsyncStorage.getItem('room')
       .then(room => {
         //Checks if room returns an empty object
-        console.log('Create Game Room', room)
+        // console.log('Create Game Room', room)
         if (room && Object.keys(JSON.parse(room)).length > 0) {
           let details = JSON.parse(room)
           //If there's more than one player in the game then go straight to game
@@ -114,7 +114,7 @@ class CreateGameScreen extends React.Component {
     // const styles = this.props.styles
 
     return (
-      <View style={styles.container}>
+      <View style={styles.container} enableEmptySections={true}>
         <TextInput style={styles.textInput} placeholder='Game Name' onChangeText={(text) => this.setState({gameName: text})} />
         <TextInput style={styles.textInput} placeholder='Hours' onChangeText={(text) => this.updateGameTime(text)} value={this.state.gameTime}></TextInput>
         <TextInput style={styles.textInput} placeholder='Game Password' onChangeText={(text) => this.setState({gamePass: text})} secureTextEntry={true}/>

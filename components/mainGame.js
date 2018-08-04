@@ -66,15 +66,16 @@ class MainGameScreen extends React.Component {
         this.setState({timer});
       })
       .catch(err => {
-        console.log('mainGame.js:59 -', err)
+        console.log('mainGame.js:69 -', err)
       })
     })
     .catch(err => {
-      console.log('mainGame.js:63 -', err)
+      console.log('mainGame.js:73 -', err)
     })
   }
 
   sortPlayers(players){
+    console.log('sortPlayers');
     let zPlayers = []
     players.map((item) =>  {
       fetch(hostIP+'/player/'+item.id)
@@ -87,33 +88,36 @@ class MainGameScreen extends React.Component {
         } else {
           zPlayers = this.state.roomHumans.slice()
           zPlayers.push(player)
-          this.setState({roomHumans: zPlayers})
+          this.setState({roomHumans: zPlayers}, () => this.nearbyPlayers(this.state.roomHumans))
         }
       })
-      .then(this.nearbyPlayers(this.state.roomHumans))
       .catch(err => {
-        console.log('mainGame.js:85 -',err)
+        console.log('mainGame.js:96 -', err)
       })
     });
   }
 
   distanceCalc(lat1, lon1, lat2, lon2){
+    console.log(lat1, lon1);
+    console.log(lat2, lon2);
     let dlon = lon2 - lon1
     let dlat = lat2 - lat1
     let a = (Math.sin(dlat/2))^2 + Math.cos(lat1) * Math.cos(lat2) * (Math.sin(dlon/2))^2
     let c = 2 * Math.atan(Math.sqrt(a), Math.sqrt(1-a) )
     let R = 6373000
     let d = R * c
+    console.log('Distance', d);
     return d
   }
 
   nearbyPlayers(players) {
     let currUser = this.state.currUser;
-
+    console.log('players', players);
     let nearby = players.filter(player => {
-      this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 100
+      return this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 100
     });
-    this.setState({nearbyPlayers: nearby});
+    console.log('nearby', nearby);
+    this.setState({nearby});
   }
 
 
@@ -143,15 +147,16 @@ class MainGameScreen extends React.Component {
 
   render(){
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-    let dataSource = ds.cloneWithRows(this.state.roomHumans);
+    let dataSource = ds.cloneWithRows(this.state.nearby);
     const display = () => {
 
       if(this.state.currUser.zombie) {
         return (
-                <View>
+                <View enableEmptySections={true}>
                   <Text style={styles.h3}>You're a Zombie</Text>
                   <Text style={styles.h4}>Nearby Snacks:</Text>
                   <ListView
+                    enableEmptySections={true}
                     renderRow={(item) => {
                       return (<TouchableOpacity style={{marginTop: 30, textAlign: 'center'}} onPress={() => this.bite(item)}><Text>{item.name}</Text></TouchableOpacity>)
                     }}
@@ -164,7 +169,7 @@ class MainGameScreen extends React.Component {
                       }/>
                   </View>)
       } else {
-        return (<View><Text style={styles.h3}>You're Still Human....for now</Text>
+        return (<View enableEmptySections={true}><Text style={styles.h3}>You're Still Human....for now</Text>
                 <Text style={styles.h4}>Human's Left: {this.state.roomHumans.length}</Text>
                 <Text style={styles.h4}>Total Players: {this.state.roomHumans.length + this.state.roomZombies.length}</Text>
                 <TouchableOpacity style={{width: 1000, height:100}} onPress={() => this.fakeDying()}></TouchableOpacity></View>)
@@ -173,7 +178,7 @@ class MainGameScreen extends React.Component {
 
 
     return (
-      <View style={styles.gameStats}>
+      <View style={styles.gameStats} enableEmptySections={true}>
         <Text style={styles.h2}>GameRoom: {this.state.game.name}</Text>
         <Text style={styles.h4}>Game Time Left: {Math.floor(this.state.game.time/3600)}:{Math.floor((this.state.game.time%3600)/60)}:{this.state.game.time%60}</Text>
         {display()}

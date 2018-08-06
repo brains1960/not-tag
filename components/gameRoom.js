@@ -258,8 +258,8 @@ class GameRoomScreen extends React.Component {
               />
             }
         />
-        <Button title="Invite Others" onPress={() => this.setState({inviteVisible: true})} style={styles.button}></Button>
-        <Button title="Start Game" onPress={() => this.startGame()} style={styles.button}></Button>
+        <TouchableOpacity title="Invite Others" onPress={() => this.setState({inviteVisible: true})} style={styles.button}></TouchableOpacity>
+        <TouchableOpacity title="Start Game" onPress={() => this.startGame()} style={styles.button}></TouchableOpacity>
         <Text>{this.state.roomError}</Text>
 
         {/* Invite Modal */}

@@ -26,6 +26,7 @@ class MainGameScreen extends React.Component {
 
   componentDidMount() {
     this.location = setInterval(() => this.updateLocation(), 30000);
+    AsyncStorage.removeItem('bitten');
     AsyncStorage.getItem('login')
     .then(parsedLogin => {
       //Get the information for the logged in player
@@ -60,6 +61,17 @@ class MainGameScreen extends React.Component {
             game.time = game.time - 1
             this.setState({game})
           }}, 1000);
+
+        this.bitten = setInterval(() => {
+          AsyncStorage.getItem('bitten')
+          .then(result => {
+            let bitten = JSON.parse(result);
+            if (bitten && bitten.player._id === this.state.currUser._id) {
+              this.props.navigation.navigate('Hunt');
+            }
+          })
+          .catch(err => console.log(err));
+        }, 1000);
       })
       .catch(err => {
         console.log('mainGame.js:69 -', err)
@@ -72,6 +84,7 @@ class MainGameScreen extends React.Component {
 
   componentWillUnMount() {
     clearInterval(this.location);
+    clearInterval(this.bitten);
   }
 
   sortPlayers(players){
@@ -107,6 +120,7 @@ class MainGameScreen extends React.Component {
     let c = 2 * Math.atan(Math.sqrt(a), Math.sqrt(1-a) )
     let R = 6373
     let d = R * c
+    console.log('Distance', d);
     return d
   }
 
@@ -150,6 +164,13 @@ class MainGameScreen extends React.Component {
         longitude: location.coords.longitude,
       })
     })
+    .then(() => {
+      AsyncStorage.mergeItem('login', {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      })
+      .catch(err => console.log('MainGame 172 - ', err));
+    })
     .catch(err => console.log('MainGame 153 - ', err));
   }
 
@@ -166,7 +187,8 @@ class MainGameScreen extends React.Component {
 
       if(this.state.currUser.zombie) {
         return (
-                <View enableEmptySections={true}>
+                <View
+                  enableEmptySections={true}>
                   <Text style={styles.h3}>You're a Zombie</Text>
                   <Text style={styles.h4}>Nearby Snacks:</Text>
                   <ListView
@@ -184,12 +206,7 @@ class MainGameScreen extends React.Component {
                       )
                     }}
                     dataSource={dataSource}
-                    refreshControl={
-                        <RefreshControl
-                          refreshing={this.state.refreshing}
-                          onRefresh={this._onRefresh}
-                        />
-                      }/>
+                    />
                   </View>)
       } else {
         return (<View enableEmptySections={true}><Text style={styles.h3}>You're Still Human....for now</Text>
@@ -201,7 +218,15 @@ class MainGameScreen extends React.Component {
 
 
     return (
-      <View style={styles.gameStats} enableEmptySections={true}>
+      <View
+        style={styles.gameStats}
+        enableEmptySections={true}
+        refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh}
+            />
+          }>
         <Text style={styles.h2}>GameRoom: {this.state.game.name}</Text>
         <Text style={styles.h4}>Game Time Left: {Math.floor(this.state.game.time/3600)}:{Math.floor((this.state.game.time%3600)/60)}:{this.state.game.time%60}</Text>
         {display()}

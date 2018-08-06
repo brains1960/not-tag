@@ -13,7 +13,7 @@ import {
   RefreshControl,
   Image,
 } from 'react-native';
-import StackNavigator from '../App';
+import StackNavigator from '../App.js';
 import { Location, Permissions, MapView } from 'expo';
 import Swiper from 'react-native-swiper'
 import CountDown from 'react-native-countdown-component';
@@ -21,8 +21,8 @@ import hostIP from '../backend'
 
 //first think if fetched for a human
 class Hunt extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       player:{},
       bitten: {}
@@ -38,7 +38,7 @@ class Hunt extends React.Component {
         this.setState({player: parsedResult});
         AsyncStorage.getItem('bitten')
         .then(resp => {
-          console.log('bittne', resp)
+          console.log('bittne', JSON.parse(resp));
           this.setState({bitten: JSON.parse(resp)})
         })
       }
@@ -62,11 +62,11 @@ zombified = (id) => {
       }))
       .then(() => {
         console.log('bite')
-        this.props.navigation.navigate('notSurvived')
+        this.props.navigation.navigate('NotSurvived');
       })
     } else {
       console.log('bite')
-      this.props.navigation.navigate('notSurvived')
+      this.props.navigation.navigate('NotSurvived')
     }
   })
   .catch(err => console.log(err))

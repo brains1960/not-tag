@@ -1,10 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View, AsyncStorage, Button, TouchableOpacity, TextInput, ListView, RefreshControl,
-Image, NativeModules } from 'react-native';
+Image } from 'react-native';
 import { Location, MapView } from 'expo';
 import StackNavigator from '../App.js'
 import hostIP from '../backend'
-import BackgroundTimer from 'react-native-background-timer';
 
 class MainGameScreen extends React.Component {
   constructor(props){
@@ -53,10 +52,10 @@ class MainGameScreen extends React.Component {
           this.props.navigation.navigate("CreateGame")
         }
 
-        const timer = BackgroundTimer.runBackgroundTimer(() => {
+        const timer = setInterval(() => {
           let game = this.state.game
           if(game.time === 0) {
-            // BackgroundTimer.stopBackgroundTimer(timer);
+            clearInterval(timer);
           } else {
             game.time = game.time - 1
             this.setState({game})

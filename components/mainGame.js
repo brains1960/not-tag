@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, AsyncStorage, Button, TouchableOpacity, TextInput, ListView, RefreshControl,
-Image } from 'react-native';
+Image, NativeModules } from 'react-native';
 import { Location, MapView } from 'expo';
 import StackNavigator from '../App.js'
 import hostIP from '../backend'
@@ -52,15 +52,15 @@ class MainGameScreen extends React.Component {
         } else {
           this.props.navigation.navigate("CreateGame")
         }
-        let timer = setInterval(() => {
+
+        const timer = BackgroundTimer.runBackgroundTimer(() => {
           let game = this.state.game
           if(game.time === 0) {
-            BackgroundTimer.stopBackgroundTimer();
+            // BackgroundTimer.stopBackgroundTimer(timer);
           } else {
             game.time = game.time - 1
             this.setState({game})
           }}, 1000);
-        this.setState({timer});
       })
       .catch(err => {
         console.log('mainGame.js:69 -', err)

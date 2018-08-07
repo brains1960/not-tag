@@ -151,9 +151,9 @@ app.get('/game/:id', function (req,res){
   })
 })
 
-/// tag who is a zombie
+/// tag who is a zombie remove 'bite'
 app.post('/player/zombify', function (req,res){
-  Player.findByIdAndUpdate(req.body.id, {zombie: true})
+  Player.findByIdAndUpdate(req.body.id, {zombie: true, bitten: false})
    .exec(function(error, response){
     if(error) res.status(500).end(error.message)
     //would like this to send back all players <---- can remove comment when done
@@ -172,8 +172,8 @@ app.post('/player/bite', function (req,res){
 })
 
 // Update Locations
-app.post('/player/location/:id', function(req, res){
-  Player.findByIdAndUpdate(req.params.id, {longitude : req.body.longitude,
+app.post('/player/location', function(req, res){
+  Player.findByIdAndUpdate(req.body.id, {longitude : req.body.longitude,
                                             latitude: req.body.latitude })
   .exec(function(err, resp){
     if(err) res.status(500).end(err.message)

@@ -22,8 +22,8 @@ import GameRoomScreen from './components/gameRoom'
 import MainGameScreen from './components/mainGame'
 import GameTransitionScreen from './components/gameTransition'
 import HuntingScreen from './components/theHunt'
-import SurvivedScreen from './components/notSurvived'
-import NotSurvivedScreen from './components/survived'
+import SurvivedScreen from './components/survived'
+import NotSurvivedScreen from './components/notSurvived'
 import JoinGameScreen from './components/joinRoom'
 
 class App extends React.Component {

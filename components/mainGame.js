@@ -35,6 +35,7 @@ class MainGameScreen extends React.Component {
       .then(resp => resp.json())
       .then(fetched => {
         this.setState({currUser: fetched}, () => {
+          console.log('User', fetched)
           AsyncStorage.getItem('room')
           .then(result => {
             let game = JSON.parse(result);
@@ -72,9 +73,9 @@ class MainGameScreen extends React.Component {
         fetch(hostIP+'/player/'+this.state.currUser._id)
         .then(resp => resp.json())
         .then(results => {
-          if (results.bitten) this.props.navigation.navigate('Hunt');
+          if (results.bitten && !results.zombie) this.props.navigation.navigate('Hunt');
         })
-        .catch(err => console.log('mainGame.js - 77', err));
+        .catch(err => console.log('mainGame.js - 78', err));
       }, 1000);
     })
     .catch(err => {
@@ -128,7 +129,7 @@ class MainGameScreen extends React.Component {
     let currUser = this.state.currUser;
     console.log(' Players', players);
     let nearby = players.filter(player => {
-      return this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 100
+      return this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 100000000000 //should be 30 meters
     });
     this.setState({nearby});
   }
@@ -157,7 +158,7 @@ class MainGameScreen extends React.Component {
     .then(resp => resp.json())
     .then(result => {
       AsyncStorage.setItem('bitten', JSON.stringify({
-        "player" : player,
+        "player" : result,
       }))
       .then(this.props.navigation.navigate('Hunt'))
       .catch(err => console.log('mainGame.js - 162', err));
@@ -167,12 +168,13 @@ class MainGameScreen extends React.Component {
 
   updateLocation = async () => {
     let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
-    fetch(hostIP+'/player/location/'+this.state.currUser._id, {
+    fetch(hostIP+'/player/location/', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        id: this.state.currUser._id,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       })
@@ -203,7 +205,13 @@ class MainGameScreen extends React.Component {
       if(this.state.currUser.zombie) {
         return (
                 <View
-                  enableEmptySections={true}>
+                  enableEmptySections={true}
+                  refreshControl={
+                      <RefreshControl
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh}
+                      />
+                    }>
                   <Text style={styles.h3}>You're a Zombie</Text>
                   <Text style={styles.h4}>Nearby Snacks:</Text>
                   <ListView
@@ -227,7 +235,7 @@ class MainGameScreen extends React.Component {
         return (<View enableEmptySections={true}><Text style={styles.h3}>You're Still Human....for now</Text>
                 <Text style={styles.h4}>Human's Left: {this.state.roomHumans.length}</Text>
                 <Text style={styles.h4}>Total Players: {this.state.roomHumans.length + this.state.roomZombies.length}</Text>
-                <TouchableOpacity style={{width: 1000, height:100}} onPress={() => this.fakeDying()}></TouchableOpacity></View>)
+                <TouchableOpacity style={{width: 1000, height:100}}></TouchableOpacity></View>)
       }
     }
 
@@ -235,13 +243,7 @@ class MainGameScreen extends React.Component {
     return (
       <View
         style={styles.gameStats}
-        enableEmptySections={true}
-        refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh}
-            />
-          }>
+        enableEmptySections={true}>
         <Text style={styles.h2}>GameRoom: {this.state.game.name}</Text>
         <Text style={styles.h4}>Game Time Left: {Math.floor(this.state.game.time/3600)}:{Math.floor((this.state.game.time%3600)/60)}:{this.state.game.time%60}</Text>
         {display()}

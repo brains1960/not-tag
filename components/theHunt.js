@@ -35,12 +35,14 @@ class Hunt extends React.Component {
       if(result){
         var parsedResult = JSON.parse(result);
         console.log('login', parsedResult)
-        this.setState({player: parsedResult}, () => console.log('Hunt - player',this.state.player));
-        AsyncStorage.getItem('bitten')
-        .then(resp => {
-          console.log('bittne', JSON.parse(resp));
-          this.setState({bitten: JSON.parse(resp)})
-        })
+        if (!parsedResult.zombie) {
+          this.setState({bitten: parsedResult});
+        } else {
+          AsyncStorage.getItem('bitten')
+          .then(resp => this.setState({bitten: JSON.parse(resp)}))
+          .catch(err => console.log('Hunt.js: 43 -', err))
+        }
+        this.setState({player: parsedResult});
       }
     })
   }
@@ -99,7 +101,7 @@ zombified = (id) => {
         </View>
       </View>
     } else {
-      return      (
+      return (
         <View
           style={{
           flex: 1,
@@ -138,7 +140,7 @@ zombified = (id) => {
       <CountDown
         until={10}
         onPress={() => this.props.navigation.navigate('Survived')}
-        onFinish={() => this.zombified(this.state.bitten.player._id)}
+        onFinish={() => this.zombified(this.state.bitten.id)}
         size={30}
         timeToShow={['S']}
         digitBgColor    = {'#A09A9A'}
@@ -148,20 +150,19 @@ zombified = (id) => {
   </View>)
 
 }
-}
-return (
-  <View
-    style={{
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor:"#e0b83e"
-  }}
-  enableEmptySections={true}>
-    {whatToDo()}
-</View>
-)
-}
+  }
+    return (
+      <View
+        style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor:"#e0b83e"
+      }}
+      enableEmptySections={true}>
+        {whatToDo()}
+    </View>)
+  }
 }
 
 export default Hunt;

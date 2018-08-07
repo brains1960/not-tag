@@ -10,7 +10,8 @@ const Player = mongoose.model('Player', {
   name: String,
   latitude: String,
   longitude: String,
-  zombie: Boolean
+  zombie: Boolean,
+  bitten: Boolean
   // game: {
   //   type: mongoose.Schema.ObjectId,
   //   ref: 'Game'
@@ -151,8 +152,18 @@ app.get('/game/:id', function (req,res){
 })
 
 /// tag who is a zombie
-app.get('/player/status/:id', function (req,res){
-  Player.findByIdAndUpdate(req.params.id, {zombie: true})
+app.post('/player/zombify', function (req,res){
+  Player.findByIdAndUpdate(req.body.id, {zombie: true})
+   .exec(function(error, response){
+    if(error) res.status(500).end(error.message)
+    //would like this to send back all players <---- can remove comment when done
+    else res.json(response)
+  })
+})
+
+// Bite someone
+app.post('/player/bite', function (req,res){
+  Player.findByIdAndUpdate(req.body.id, {bitten: true})
    .exec(function(error, response){
     if(error) res.status(500).end(error.message)
     //would like this to send back all players <---- can remove comment when done

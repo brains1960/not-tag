@@ -34,51 +34,51 @@ class MainGameScreen extends React.Component {
       fetch(hostIP+'/player/'+player.id)
       .then(resp => resp.json())
       .then(fetched => {
-        this.setState({currUser: fetched}, () => console.log('user', this.state.currUser))
-      })
-      AsyncStorage.getItem('room')
-      .then(result => {
-        let game = JSON.parse(result);
-        game.time = game.time*3600
-        if (!game.state) {
-          this.props.navigation.navigate('GameRoom');
-        }
-        //If in a room
-        if (Object.keys(game).length > 0) {
-          this.setState({game});
-          //Sort players into zombies n humans
-          this.sortPlayers(game.players)
-
-        } else {
-          this.props.navigation.navigate("CreateGame")
-        }
-
-        const timer = setInterval(() => {
-          let game = this.state.game
-          if(game.time === 0) {
-            clearInterval(timer);
-          } else {
-            game.time = game.time - 1
-            this.setState({game})
-          }}, 1000);
-
-        this.bitten = setInterval(() => {
-          AsyncStorage.getItem('bitten')
+        this.setState({currUser: fetched}, () => {
+          AsyncStorage.getItem('room')
           .then(result => {
-            let bitten = JSON.parse(result);
-            if (bitten && bitten.player._id === this.state.currUser._id) {
-              this.props.navigation.navigate('Hunt');
+            let game = JSON.parse(result);
+            game.time = game.time*3600
+            if (!game.state) {
+              this.props.navigation.navigate('GameRoom');
+            }
+            //If in a room
+            if (Object.keys(game).length > 0) {
+              this.setState({game});
+              //Sort players into zombies n humans
+              this.sortPlayers(game.players)
+
+            } else {
+              this.props.navigation.navigate("CreateGame")
             }
           })
-          .catch(err => console.log(err));
-        }, 1000);
+          .catch(err => {
+            console.log('mainGame.js:56 -', err)
+          })
+        })
       })
-      .catch(err => {
-        console.log('mainGame.js:69 -', err)
-      })
+
+      const timer = setInterval(() => {
+        let game = this.state.game
+        if(game.time === 0) {
+          clearInterval(timer);
+        } else {
+          game.time = game.time - 1
+          this.setState({game})
+        }}, 1000);
+
+        // Check if player has been bitten every second
+      this.bitten = setInterval(() => {
+        fetch(hostIP+'/player/'+this.state.currUser._id)
+        .then(resp => resp.json())
+        .then(results => {
+          if (results.bitten) this.props.navigation.navigate('Hunt');
+        })
+        .catch(err => console.log('mainGame.js - 77', err));
+      }, 1000);
     })
     .catch(err => {
-      console.log('mainGame.js:73 -', err)
+      console.log('mainGame.js:81 -', err)
     })
   }
 
@@ -118,7 +118,7 @@ class MainGameScreen extends React.Component {
     lat2 = lat2 * (Math.PI / 180)
     let a = (Math.sin(dlat/2))^2 + Math.cos(lat1) * Math.cos(lat2) * (Math.sin(dlon/2))^2
     let c = 2 * Math.atan(Math.sqrt(a), Math.sqrt(1-a) )
-    let R = 6373
+    let R = 6373000
     let d = R * c
     console.log('Distance', d);
     return d
@@ -128,7 +128,7 @@ class MainGameScreen extends React.Component {
     let currUser = this.state.currUser;
     console.log(' Players', players);
     let nearby = players.filter(player => {
-      return this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 10
+      return this.distanceCalc(Number(currUser.latitude), Number(currUser.longitude), Number(player.latitude), Number(player.longitude)) < 100
     });
     this.setState({nearby});
   }
@@ -145,11 +145,24 @@ class MainGameScreen extends React.Component {
   }
 
   bite(player) {
-    AsyncStorage.setItem('bitten', JSON.stringify({
-      "player" : player,
-    }))
-    .then(this.props.navigation.navigate('Hunt'))
-    .catch(err => console.log(err));
+    fetch(hostIP+'/player/bite', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: player._id
+      })
+    })
+    .then(resp => resp.json())
+    .then(result => {
+      AsyncStorage.setItem('bitten', JSON.stringify({
+        "player" : player,
+      }))
+      .then(this.props.navigation.navigate('Hunt'))
+      .catch(err => console.log('mainGame.js - 162', err));
+    })
+    .catch(err => console.log('mainGame.js - 164', err));
   }
 
   updateLocation = async () => {
@@ -164,14 +177,16 @@ class MainGameScreen extends React.Component {
         longitude: location.coords.longitude,
       })
     })
-    .then(() => {
-      AsyncStorage.mergeItem('login', {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      })
-      .catch(err => console.log('MainGame 172 - ', err));
+    .then((resp) => resp.json())
+    .then(result => {
+      AsyncStorage.mergeItem('login', JSON.stringify({
+        zombie: result.zombie,
+        latitude: result.latitude,
+        longitude: result.longitude,
+      }))
+      .catch(err => console.log('MainGame 186 - ', err));
     })
-    .catch(err => console.log('MainGame 153 - ', err));
+    .catch(err => console.log('MainGame 188 - ', err));
   }
 
   _onRefresh = () => {

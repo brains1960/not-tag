@@ -11,7 +11,7 @@ import {
   AsyncStorage,
   RefreshControl,
 } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation';
 import { Location, Permissions, MapView } from 'expo';
 import Swiper from 'react-native-swiper'
 
@@ -39,7 +39,7 @@ class App extends React.Component {
 }
 
 //Navigator
-export default StackNavigator({
+export default createStackNavigator({
   Home:{
     screen: App,
   },

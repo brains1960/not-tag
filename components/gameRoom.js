@@ -181,7 +181,15 @@ class GameRoomScreen extends React.Component {
       let zombie = this.state.players[Math.floor(Math.random() * this.state.players.length)]
 
       //Backend to update players status to zombie
-      fetch(hostIP+'/player/status/'+zombie.id)
+      fetch(hostIP+'/player/zombify',{
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: zombie.id
+        })
+      })
       .then(result => result.json())
       .then(player => {
         // Check if logged in user is the selected Zombie

@@ -35,7 +35,7 @@ class Hunt extends React.Component {
       if(result){
         var parsedResult = JSON.parse(result);
         console.log('login', parsedResult)
-        this.setState({player: parsedResult});
+        this.setState({player: parsedResult}, () => console.log('Hunt - player',this.state.player));
         AsyncStorage.getItem('bitten')
         .then(resp => {
           console.log('bittne', JSON.parse(resp));
@@ -48,15 +48,18 @@ class Hunt extends React.Component {
 
 zombified = (id) => {
   // this.props.navigation.navigate('notSurvived')
-  fetch(hostIP+'/player/status/'+id, {
-    method: 'GET',
+  fetch(hostIP+'/player/zombify', {
+    method: 'POST',
     headers: {
       "Content-Type": "application/json"
-    }
+    },
+    body: JSON.stringify({
+      id
+    })
   })
   .then(resp => resp.json())
   .then(parsedResp => {
-    if(parsedResp && parsedResp.name === this.state.name) {
+    if(parsedResp && parsedResp._id === this.state.player._id) {
       AsyncStorage.mergeItem('login', JSON.stringify({
         "zombie" : true,
       }))
@@ -69,7 +72,7 @@ zombified = (id) => {
       this.props.navigation.navigate('NotSurvived')
     }
   })
-  .catch(err => console.log(err))
+  .catch(err => console.log('Hunt.js - 75', err))
   }
 
   render() {

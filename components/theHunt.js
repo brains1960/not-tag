@@ -25,7 +25,8 @@ class Hunt extends React.Component {
     super(props);
     this.state = {
       player:{},
-      bitten: {}
+      bitten: {},
+      survived: false,
     }
   }
 
@@ -39,7 +40,20 @@ class Hunt extends React.Component {
           this.setState({bitten: parsedResult});
         } else {
           AsyncStorage.getItem('bitten')
-          .then(resp => this.setState({bitten: JSON.parse(resp)}))
+          .then(resp => this.setState({bitten: JSON.parse(resp)}, () => {
+            this.checkSurvived = setInterval(()=> {
+              fetch(hostIP+'/player/'+this.state.bitten.player._id)
+              .then(resp => resp.json())
+              .then(result => {
+                if (!result.bitten) {
+                  this.setState({survived: true});
+                  clearInterval(this.checkSurvived);
+                  this.props.navigation.navigate('Survived');
+                }
+              })
+              .catch(err => console.log('hunt.js: 59 - ', err));
+            }, 1000);
+          }))
           .catch(err => console.log('Hunt.js: 43 -', err))
         }
         this.setState({player: parsedResult});
@@ -47,34 +61,54 @@ class Hunt extends React.Component {
     })
   }
 
+  componentWillUnMount() {
+    clearInterval(this.checkSurvived);
+  }
 
-zombified = (id) => {
-  // this.props.navigation.navigate('notSurvived')
-  fetch(hostIP+'/player/zombify', {
-    method: 'POST',
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      id
-    })
-  })
-  .then(resp => resp.json())
-  .then(parsedResp => {
-    if(parsedResp && parsedResp._id === this.state.player._id) {
-      AsyncStorage.mergeItem('login', JSON.stringify({
-        "zombie" : true,
-      }))
-      .then(() => {
-        console.log('bite')
-        this.props.navigation.navigate('NotSurvived');
+
+  zombified = (id) => {
+    // this.props.navigation.navigate('notSurvived')
+    if (!this.state.survived) {
+      fetch(hostIP+'/player/zombify', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id
+        })
       })
-    } else {
-      console.log('bite')
-      this.props.navigation.navigate('NotSurvived')
+      .then(resp => resp.json())
+      .then(parsedResp => {
+        if(parsedResp && parsedResp._id === this.state.player._id) {
+          AsyncStorage.mergeItem('login', JSON.stringify({
+            "zombie" : true,
+          }))
+          .then(() => {
+            console.log('bite')
+            this.props.navigation.navigate('NotSurvived');
+          })
+        } else {
+          console.log('bite')
+          this.props.navigation.navigate('NotSurvived')
+        }
+      })
+      .catch(err => console.log('Hunt.js - 75', err))
     }
-  })
-  .catch(err => console.log('Hunt.js - 75', err))
+  }
+
+  survived = (id) => {
+    fetch(hostIP+'/player/antidote',{
+      method: 'POST',
+      headers: {
+        "Content-Type" : "application/json"
+      },
+      body: JSON.stringify({
+        id
+      })
+    })
+    .then(resp => this.props.navigation.navigate('Survived'))
+    .catch(err => console.log('Hunt.js: 103 - ', err));
   }
 
   render() {
@@ -139,8 +173,7 @@ zombified = (id) => {
     <View enableEmptySections={true}>
       <CountDown
         until={10}
-        onPress={() => this.props.navigation.navigate('Survived')}
-        onFinish={() => this.zombified(this.state.bitten.id)}
+        onPress={() => this.survived(this.state.bitten.id) }
         size={30}
         timeToShow={['S']}
         digitBgColor    = {'#A09A9A'}

@@ -192,8 +192,7 @@ class MainGameScreen extends React.Component {
   }
 
   _onRefresh = () => {
-    this.setState({refreshing: true});
-    this.sortPlayers(this.state.players)
+    this.setState({refreshing: true}, () => this.sortPlayers(this.state.players));
     this.setState({refreshing: false});
   }
 
@@ -206,12 +205,7 @@ class MainGameScreen extends React.Component {
         return (
                 <View
                   enableEmptySections={true}
-                  refreshControl={
-                      <RefreshControl
-                        refreshing={this.state.refreshing}
-                        onRefresh={this._onRefresh}
-                      />
-                    }>
+                  >
                   <Text style={styles.h3}>You're a Zombie</Text>
                   <Text style={styles.h4}>Nearby Snacks:</Text>
                   <ListView
@@ -243,7 +237,13 @@ class MainGameScreen extends React.Component {
     return (
       <View
         style={styles.gameStats}
-        enableEmptySections={true}>
+        enableEmptySections={true}
+        refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={() => this._onRefresh()}
+            />
+          }>
         <Text style={styles.h2}>GameRoom: {this.state.game.name}</Text>
         <Text style={styles.h4}>Game Time Left: {Math.floor(this.state.game.time/3600)}:{Math.floor((this.state.game.time%3600)/60)}:{this.state.game.time%60}</Text>
         {display()}

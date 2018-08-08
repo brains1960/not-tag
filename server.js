@@ -151,7 +151,7 @@ app.get('/game/:id', function (req,res){
   })
 })
 
-/// tag who is a zombie remove 'bite'
+/// tag who is a zombie, remove 'bite'
 app.post('/player/zombify', function (req,res){
   Player.findByIdAndUpdate(req.body.id, {zombie: true, bitten: false})
    .exec(function(error, response){
@@ -164,6 +164,16 @@ app.post('/player/zombify', function (req,res){
 // Bite someone
 app.post('/player/bite', function (req,res){
   Player.findByIdAndUpdate(req.body.id, {bitten: true})
+   .exec(function(error, response){
+    if(error) res.status(500).end(error.message)
+    //would like this to send back all players <---- can remove comment when done
+    else res.json(response)
+  })
+})
+
+// Bite someone
+app.post('/player/antidote', function (req,res){
+  Player.findByIdAndUpdate(req.body.id, {bitten: false})
    .exec(function(error, response){
     if(error) res.status(500).end(error.message)
     //would like this to send back all players <---- can remove comment when done
